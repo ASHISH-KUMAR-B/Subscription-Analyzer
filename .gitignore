@@ -16,8 +16,7 @@
 /Frontend/build/
 /Frontend/package-lock.json
 
-# Android Gradle
-/Frontend/MyJavaApplication/
+
 
 # Environment variables
 .env

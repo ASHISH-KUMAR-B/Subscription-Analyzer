@@ -5,16 +5,6 @@ import java.util.*;
 
 @Repository
 public interface RecommendationRepository extends JpaRepository<Recommendation, Long> {
-<<<<<<< HEAD
-    List<Recommendation> findBySubscriptionProviderName(String providerName);
-    Optional<Recommendation> findById(long id);
-     Optional<Recommendation> findByUserIdAndSubscriptionId(Long userId, Long subscriptionId);
-    Recommendation deleteById(int id);
-
-
-    
-=======
     List<Recommendation> findAllByUserIdOrderByGeneratedAtDesc(Long userId);
     void deleteByUserIdAndStatusNot(Long userId, Status status);
->>>>>>> 75be6cf (Subscription-analytics)
 }
