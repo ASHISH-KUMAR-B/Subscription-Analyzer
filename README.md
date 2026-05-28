@@ -1,403 +1,90 @@
-<<<<<<< HEAD
-# 📱📊 Subscription Insight System
-
-A **full-stack subscription analytics platform** that combines an **Android app usage collector** with a **Spring Boot backend** to provide:
-
-* 📈 App usage analytics
-* 💳 Subscription billing insights
-* 🤖 Smart recommendations (KEEP / CONSIDER / CANCEL)
-* 📊 Dashboard visualizations
-
-This project helps users understand whether their premium subscriptions (Spotify, Netflix, YouTube Premium, etc.) are actually worth paying for.
-
----
-
-# 🚀 Project Architecture
-
-```text
-Android App
-   ↓
-UsageStatsManager + AppsUsageMonitorAPI
-   ↓
-Retrofit API Calls
-   ↓
-Spring Boot Backend
-   ↓
-MySQL (Docker Container)
-   ↓
-Analytics + Recommendations
-   ↓
-Android Dashboard UI
-```
-
----
-
-# 🧠 Core Idea
-
-The system collects **real mobile app usage data** from Android devices and maps it to user subscriptions.
-
-Using this data, the backend:
-
-1. Tracks monthly app usage
-2. Compares usage against subscription cost
-3. Generates monthly billing records
-4. Produces recommendations
-5. Sends analytics to the dashboard
-
----
-
-# 🛠️ Tech Stack
-
-## 📱 Android Frontend
-
-* **Java**
-* **XML layouts**
-* **Retrofit** for API calls
-* **AppsUsageMonitorAPI** for usage collection
-* Android `UsageStatsManager`
-* MPAndroidChart (planned dashboard charts)
-
-### Android usage library
-
-Used reference implementation:
-
-```text
-https://github.com/TheBotBox/AppsUsageMonitorAPI/tree/master/appusagemonitor/src
-```
-
----
-
-## 🌐 Backend
-
-* **Java 17**
-* **Spring Boot**
-* Spring Web
-* Spring Data JPA
-* Spring Security
-* JWT Authentication
-* Flyway migrations
-
----
-
-## 🗄️ Database
-
-* **MySQL**
-* Docker containerized setup
-* Database name: `subscription_db`
-
----
-
-# 🐳 Database Setup (Docker)
-
-## Start MySQL container
-
-```bash
-docker run --name subscription-mysql \
--e MYSQL_ROOT_PASSWORD=root \
--e MYSQL_DATABASE=subscription_db \
--p 3306:3306 \
--d mysql:8
-```
-
-## Verify container
-
-```bash
-docker ps
-```
-
-## Open MySQL shell
-
-```bash
-docker exec -it subscription-mysql mysql -u root -p
-```
-
----
-
-# 🗂️ Database Schema
-
-## 👤 users
-
-Stores authenticated users.
-
-Fields:
-
-* id
-* username
-* email
-* passwordhash
-* status
-* created_at
-* last_login_at
-
----
-
-## 📦 subscriptions
-
-Stores user subscriptions.
-
-Fields:
-
-* id
-* user_id
-* provider_name
-* package_name
-* category
-* renewal_cycle
-* price
-* currency
-* status
-
----
-
-## 📊 user_snapshots
-
-Monthly app usage snapshots.
-
-Fields:
-
-* id
-* subscription_id
-* period
-* usage_count
-* last_used_at
-* source
-
----
-
-## 💳 billing_records
-
-Stores generated billing data.
-
-Fields:
-
-* id
-* subscription_id
-* amount
-* billing_period
-* payment_method
-* source
-
----
-
-## 🤖 recommendations
-
-AI-style recommendation engine output.
-
-Fields:
-
-* id
-* user_id
-* subscription_id
-* type
-* reason
-* confidence_score
-
----
-
-# 🔄 System Workflow
-
-```text
-User Login
-   ↓
-Grant Usage Permission
-   ↓
-Android fetches app usage
-   ↓
-Send JSON to Spring Boot
-   ↓
-Match app package → subscription
-   ↓
-Update user_snapshots
-   ↓
-Generate billing_records
-   ↓
-Generate recommendations
-   ↓
-Dashboard API response
-   ↓
-Android analytics graphs
-```
-
----
-
-# 📦 Backend Modules
-
-## 🔐 1. Auth Module
-
-Handles:
-
-* Signup
-* Login
-* JWT token generation
-* BCrypt password hashing
-
-Endpoints:
-
-```text
-POST /auth/signup
-POST /auth/login
-```
-
----
-
-## 📦 2. Subscription Module
-
-Handles:
-
-* Add subscription
-* Fetch user subscriptions
-* Package name mapping
-
-Endpoints:
-
-```text
-GET /api/subscriptions/{userId}
-POST /api/subscriptions/{userId}
-```
-
----
-
-## 📊 3. Usage Module
-
-Processes Android usage sync.
-
-Endpoint:
-
-```text
-POST /api/usage
-```
-
-Responsibilities:
-
-* Receive app usage data
-* Match package names
-* Update `user_snapshots`
-
----
-
-## 💳 4. Billing Module
-
-Generates billing data from subscriptions.
-
-Logic:
-
-```text
-subscription.price → billing_records
-```
-
----
-
-## 🤖 5. Recommendation Module
-
-Recommendation rules:
-
-```text
-usage < 30      → CANCEL
-30 <= usage <100 → CONSIDER
-usage >=100      → KEEP
-```
-
----
-
-## 📊 6. Dashboard Module
-
-Combines:
-
-* usage analytics
-* billing insights
-* recommendations
-
-Endpoint:
-
-```text
-GET /api/dashboard/{userId}
-```
-
----
-
-# 📱 Android App Flow
-
-## Screen 1 — Login
-
-* User authentication
-* JWT token received
-
-## Screen 2 — Home
-
-* Allow Usage Permission
-* Sync Usage button
-* Dashboard button
-
-## Screen 3 — Dashboard
-
-* App usage charts
-* Cost analytics
-* KEEP / CANCEL recommendations
-
----
-
-# 🔌 Android → Backend Payload
-
-```json
-{
-  "userId": 1,
-  "apps": [
-    {
-      "packageName": "com.spotify.music",
-      "appName": "Spotify",
-      "usageMinutes": 120
-    }
-  ]
-}
-```
-
----
-
-# 🧱 Project Folder Structure
-
-```text
-subscription-backend/
-│── src/main/java/com/yourorg
-│   ├── Auth
-│   ├── Users
-│   ├── Subscriptions
-│   ├── UserSnapshot
-│   ├── Billing
-│   ├── Recommendation
-│   └── Dashboard
-│
-│── src/main/resources
-│   ├── application.yml
-│   └── db/migration
-│       ├── V1__init_schema.sql
-│       ├── V2__add_package_name.sql
-│       └── V3__seed_data.sql
-=======
 # Subscription Analytics Platform
 
-A comprehensive subscription management and analytics platform that helps users track, manage, and optimize their subscriptions with detailed billing records, usage tracking, and intelligent recommendations.
+A full-stack subscription analytics web application combining a React frontend (Vite) and a Spring Boot backend. The system ingests app-usage data, maps usage to subscriptions, generates billing records, and produces recommendations to help users optimize subscriptions.
 
-## 📋 Table of Contents
+## Features
+- Usage tracking and aggregation
+- Subscription CRUD and mapping by package name
+- Billing record generation
+- Recommendation engine (KEEP / CONSIDER / CANCEL)
+- REST APIs for dashboard data and sync
 
-- [Overview](#overview)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Installation & Setup](#installation--setup)
-- [Configuration](#configuration)
-- [API Endpoints](#api-endpoints)
-- [Database Schema](#database-schema)
-- [Design Patterns](#design-patterns)
-- [Usage Examples](#usage-examples)
-- [Development](#development)
-- [Deployment](#deployment)
-- [Contributing](#contributing)
-- [License](#license)
+## Architecture
+
+React (Vite) frontend ↔ Spring Boot backend ↔ MySQL database
+
+## Tech Stack
+- Frontend: React + Vite, Tailwind/CSS, axios
+- Backend: Java 17, Spring Boot, Spring Data JPA, Spring Security, JWT, Flyway
+- Database: MySQL (or local dev alternative H2)
+- Storage: Cloudinary (optional for CSV/uploads)
+
+## Project Structure
+- Root: README.md, .gitignore
+- Backend: Spring Boot app at `Backend/`
+- Frontend: React app at `Frontend/`
+
+## Quick Start
+
+1) Backend — run locally
+
+Ensure you have JDK 17 and Maven.
+
+Copy `Backend/.env.example` to `Backend/.env` and fill values, or set environment variables. Key variables:
+
+- `DB_URL` (jdbc url)
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `SERVER_PORT`
+- `CLOUDINARY_*` (if using Cloudinary)
+- `JWT_SECRET`
+
+Run the backend:
+```powershell
+cd Backend
+.\mvnw.cmd -DskipTests spring-boot:run
+```
+
+2) Frontend — run locally
+
+Ensure Node.js is installed.
+
+```powershell
+cd Frontend
+npm install
+npm run dev
+```
+
+Open the frontend at the address shown by Vite (usually `http://localhost:5173`).
+
+## Configuration
+- `Backend/application.yml` reads environment variables; defaults are provided but you should supply a `Backend/.env` for local development.
+- Keep sensitive values out of Git. `.gitignore` already ignores `.env`.
+
+## Database Migrations
+Flyway migrations live in `Backend/src/main/resources/db/migration` and run automatically on application start (if configured).
+
+## Environment Example
+See `Backend/.env.example` for a template. Don't commit your own `Backend/.env`.
+
+## Common Commands
+- Build backend: `cd Backend && .\mvnw.cmd -DskipTests package`
+- Run backend tests: `cd Backend && .\mvnw.cmd test`
+- Build frontend for production: `cd Frontend && npm run build`
+
+## Pushing to Your GitHub
+You already pushed this repository to `https://github.com/ASHISH-KUMAR-B/Subscription-Analyzer.git`.
+
+## Contributing
+- Fix bugs or add features via pull requests.
+- Keep secrets out of commits; use `.env` for local overrides.
+
+## License
+Specify a license for this project (add a `LICENSE` file).
 
 ---
 
-## 🎯 Overview
+If you want, I can extend this README with API examples, full environment variable descriptions, or deployment instructions (Docker/GitHub Actions). 
 
 **Subscription Analytics** is a full-stack web application designed to help users manage multiple subscriptions efficiently. It provides:
 
