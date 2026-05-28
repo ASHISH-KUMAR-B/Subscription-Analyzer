@@ -1,0 +1,27 @@
+# Java
+/target/
+*.class
+
+# Maven
+.mvn/
+/.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.idea/
+.vscode/
+
+# Node
+/Frontend/node_modules/
+/Frontend/dist/
+/Frontend/build/
+/Frontend/package-lock.json
+
+# Android Gradle
+/Frontend/MyJavaApplication/
+
+# Environment variables
+.env
+Backend/.env
+
+# Logs
+.log
